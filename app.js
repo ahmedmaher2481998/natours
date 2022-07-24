@@ -1,34 +1,21 @@
-//cleaning the terminal on start
-console.clear();
-const { application } = require('express');
 const express = require('express');
-
 const app = express();
 const port = process.env.PORT || 3000;
 const fs = require('fs');
+
 //use json middleware
 app.use(express.json());
-// app.get('/', (req, res) => {
-//   res.status(200).json({ msg: 'this is from express ', app: 'natours2' });
-//   res.end();
-// });
-
-// app.post('/', (req, res) => {
-//   res.send('You can post o this endpoint now....');
-// });
 const toursEnpPoint = '/api/1/tours';
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
 
-//get all tours
-app.get(`${toursEnpPoint}`, (req, res) => {
+const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
     results: tours.length,
     data: { tours },
   });
-});
-//get tour by id
-app.get(`${toursEnpPoint}/:id`, (req, res) => {
+};
+const GetTourById = (req, res) => {
   const id = +req.params.id;
   const requestedTour = tours.find((el) => el.id === id);
   if (!requestedTour) {
@@ -41,11 +28,8 @@ app.get(`${toursEnpPoint}/:id`, (req, res) => {
     status: 'success',
     data: requestedTour,
   });
-});
-
-//create new tour
-app.post(`${toursEnpPoint}`, (req, res) => {
-  console.log(req);
+};
+const createTour = (req, res) => {
   const newTour = {
     id: tours[tours.length - 1].id + 1,
     ...req.body,
@@ -58,9 +42,8 @@ app.post(`${toursEnpPoint}`, (req, res) => {
       data: newTour,
     });
   });
-});
-//patch tour
-app.patch(`${toursEnpPoint}/:id`, (req, res) => {
+};
+const UpdateTour = (req, res) => {
   //check if tour exists
   if (req.params.id * 1 > tours.length - 1) {
     res.status(404).json({
@@ -73,9 +56,8 @@ app.patch(`${toursEnpPoint}/:id`, (req, res) => {
     body: req.body,
     data: '<Updated Tour here ...',
   });
-});
-// delete tour
-app.delete(`${toursEnpPoint}/:id`, (req, res) => {
+};
+const deleteTour = (req, res) => {
   if (req.params.id * 1 > tours.length - 1) {
     res.status(404).json({
       status: 'Failed',
@@ -86,7 +68,22 @@ app.delete(`${toursEnpPoint}/:id`, (req, res) => {
     status: 'success',
     data: null,
   });
-});
+};
+// //get all tours
+// app.get(`${toursEnpPoint}`, getAllTours);
+// //get tour by id
+// app.get(`${toursEnpPoint}/:id`, GetTourById);
+// //create new tour
+// app.post(`${toursEnpPoint}`, createTour);
+// //patch tour
+// app.patch(`${toursEnpPoint}/:id`, UpdateTour);
+// // delete tour
+// app.delete(`${toursEnpPoint}/:id`, deleteTour);
+//refactoring in a better way
+app.route(toursEnpPoint).get(getAllTours).post(createTour);
+app.route(`${toursEnpPoint}/:id`).get(GetTourById).patch(UpdateTour).delete(deleteTour);
+
+//star the server
 app.listen(port, () => {
   console.log('App running on port' + port);
 });
