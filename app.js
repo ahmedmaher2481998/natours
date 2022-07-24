@@ -16,11 +16,11 @@ app.use(express.json());
 // app.post('/', (req, res) => {
 //   res.send('You can post o this endpoint now....');
 // });
-const toursEnpPint = '/api/1/tours';
+const toursEnpPoint = '/api/1/tours';
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
 
 //get all tours
-app.get(`${toursEnpPint}`, (req, res) => {
+app.get(`${toursEnpPoint}`, (req, res) => {
   res.status(200).json({
     status: 'success',
     results: tours.length,
@@ -28,7 +28,7 @@ app.get(`${toursEnpPint}`, (req, res) => {
   });
 });
 //get tour by id
-app.get(`${toursEnpPint}/:id`, (req, res) => {
+app.get(`${toursEnpPoint}/:id`, (req, res) => {
   const id = +req.params.id;
   const requestedTour = tours.find((el) => el.id === id);
   if (!requestedTour) {
@@ -44,7 +44,7 @@ app.get(`${toursEnpPint}/:id`, (req, res) => {
 });
 
 //create new tour
-app.post(`${toursEnpPint}`, (req, res) => {
+app.post(`${toursEnpPoint}`, (req, res) => {
   console.log(req);
   const newTour = {
     id: tours[tours.length - 1].id + 1,
@@ -57,6 +57,34 @@ app.post(`${toursEnpPint}`, (req, res) => {
       status: 'success',
       data: newTour,
     });
+  });
+});
+//patch tour
+app.patch(`${toursEnpPoint}/:id`, (req, res) => {
+  //check if tour exists
+  if (req.params.id * 1 > tours.length - 1) {
+    res.status(404).json({
+      status: 'Failed',
+      message: 'Invalid Id...',
+    });
+  }
+  res.status(200).json({
+    status: 'success',
+    body: req.body,
+    data: '<Updated Tour here ...',
+  });
+});
+// delete tour
+app.delete(`${toursEnpPoint}/:id`, (req, res) => {
+  if (req.params.id * 1 > tours.length - 1) {
+    res.status(404).json({
+      status: 'Failed',
+      message: 'Invalid Id...',
+    });
+  }
+  res.status(204).json({
+    status: 'success',
+    data: null,
   });
 });
 app.listen(port, () => {
