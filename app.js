@@ -5,7 +5,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const fs = require('fs');
 //use json middleware
-application.use(express.json());
+app.use(express.json());
 // app.get('/', (req, res) => {
 //   res.status(200).json({ msg: 'this is from express ', app: 'natours2' });
 //   res.end();
@@ -24,7 +24,8 @@ app.get('/api/1/tours', (req, res) => {
 });
 
 app.post('/api/1/tours', (req, res) => {
-  console.log(req.body);
+  console.log(req);
+
   const newTour = {
     id: tours[tours.length - 1].id + 1,
     ...req.body,
