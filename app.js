@@ -1,3 +1,5 @@
+//cleaning the terminal on start
+console.clear();
 const { application } = require('express');
 const express = require('express');
 
@@ -14,18 +16,36 @@ app.use(express.json());
 // app.post('/', (req, res) => {
 //   res.send('You can post o this endpoint now....');
 // });
+const toursEnpPint = '/api/1/tours';
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
-app.get('/api/1/tours', (req, res) => {
+
+//get all tours
+app.get(`${toursEnpPint}`, (req, res) => {
   res.status(200).json({
     status: 'success',
     results: tours.length,
     data: { tours },
   });
 });
+//get tour by id
+app.get(`${toursEnpPint}/:id`, (req, res) => {
+  const id = +req.params.id;
+  const requestedTour = tours.find((el) => el.id === id);
+  if (!requestedTour) {
+    res.status(404).json({
+      status: 'Failed',
+      message: 'Invalid Id...',
+    });
+  }
+  res.json({
+    status: 'success',
+    data: requestedTour,
+  });
+});
 
-app.post('/api/1/tours', (req, res) => {
+//create new tour
+app.post(`${toursEnpPint}`, (req, res) => {
   console.log(req);
-
   const newTour = {
     id: tours[tours.length - 1].id + 1,
     ...req.body,
@@ -33,7 +53,7 @@ app.post('/api/1/tours', (req, res) => {
   tours.push(newTour);
   fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), (err) => {
     if (err) console.log("Couldn't write to file...");
-    res.json({
+    res.status(201).json({
       status: 'success',
       data: newTour,
     });
