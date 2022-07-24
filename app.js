@@ -2,12 +2,18 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 const fs = require('fs');
+const morgan = require('morgan');
 
-//use json middleware
-app.use(express.json());
+//middleware
 const toursEnpPoint = '/api/1/tours';
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
-
+app.use(morgan('dev'));
+app.use(express.json());
+app.use((req, res, next) => {
+  console.log('Hello from your own middleWare..');
+  next();
+});
+// route handlers
 const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -19,12 +25,12 @@ const GetTourById = (req, res) => {
   const id = +req.params.id;
   const requestedTour = tours.find((el) => el.id === id);
   if (!requestedTour) {
-    res.status(404).json({
+    return res.status(404).json({
       status: 'Failed',
       message: 'Invalid Id...',
     });
   }
-  res.json({
+  return res.json({
     status: 'success',
     data: requestedTour,
   });
@@ -79,7 +85,7 @@ const deleteTour = (req, res) => {
 // app.patch(`${toursEnpPoint}/:id`, UpdateTour);
 // // delete tour
 // app.delete(`${toursEnpPoint}/:id`, deleteTour);
-//refactoring in a better way
+//routes
 app.route(toursEnpPoint).get(getAllTours).post(createTour);
 app.route(`${toursEnpPoint}/:id`).get(GetTourById).patch(UpdateTour).delete(deleteTour);
 
