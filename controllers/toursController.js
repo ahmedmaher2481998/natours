@@ -1,4 +1,5 @@
 const fs = require('fs');
+
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
 exports.checkId = (req, res, next, val) => {
@@ -43,6 +44,7 @@ exports.checkBody = (req, res, next) => {
 exports.createTour = (req, res) => {
   const newTour = {
     id: tours[tours.length - 1].id + 1,
+    //eslint-disable-next-line
     ...req.body,
   };
   tours.push(newTour);
