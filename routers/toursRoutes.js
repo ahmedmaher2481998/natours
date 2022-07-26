@@ -8,12 +8,14 @@ const {
   createTour,
   deleteTour,
   checkId,
+  checkBody,
 } = require('../controllers/toursController');
+if (checkBody) console.log('exist');
 
 router.param('id', checkId);
 
 //Tours Routes
-router.route('/').get(getAllTours).post(createTour);
+router.route('/').get(getAllTours).post(checkBody, createTour);
 router.route(`/:id`).get(GetTourById).patch(UpdateTour).delete(deleteTour);
 
 module.exports = router;
