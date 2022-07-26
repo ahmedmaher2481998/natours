@@ -10,7 +10,6 @@ const {
   checkId,
   checkBody,
 } = require('../controllers/toursController');
-if (checkBody) console.log('exist');
 
 router.param('id', checkId);
 

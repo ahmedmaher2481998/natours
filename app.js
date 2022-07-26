@@ -7,15 +7,17 @@ const morgan = require('morgan');
 const toursEndPoint = '/api/1/tours';
 const usersEndPoint = '/api/1/users';
 
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+  app.use((req, res, next) => {
+    console.log('Hello from your own middleWare..');
+    next();
+  });
+}
 //third party middleware
-app.use(morgan('dev'));
 app.use(express.json());
-
+app.use(express.static(`${__dirname}/public`));
 //our own middleware
-app.use((req, res, next) => {
-  console.log('Hello from your own middleWare..');
-  next();
-});
 
 // route handlers
 

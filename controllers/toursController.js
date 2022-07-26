@@ -2,7 +2,6 @@ const fs = require('fs');
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
 exports.checkId = (req, res, next, val) => {
-  console.log('tour id is : ' + val);
   //check if tour exists
   if (val * 1 > tours.length - 1) {
     return res.status(404).json({
