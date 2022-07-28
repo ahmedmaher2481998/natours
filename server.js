@@ -15,13 +15,15 @@ mongoose
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,
+    useUnifiedTopology: true,
   })
-  .then((con) => {
-    console.log(con);
+  .then(() => {
+    console.log('Connecting to DB successfully');
   })
   .catch((err) => {
     console.error(err);
   });
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   //eslint-disable-next-line
