@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 const Tour = require('../../models/tourModel');
-const { argv } = require('process');
 
 const db =
   'mongodb+srv://amaher:u7Leacu5rW3G0U8c@cluster0.6joc2.mongodb.net/natours?retryWrites=true&w=majority';
@@ -51,10 +50,3 @@ if (process.argv[2] === '--imp') {
   console.log(process.argv[2]);
   importData();
 }
-if (argv[2] === 'get') {
-  Tour.find().then((d) => {
-    console.log(d);
-  });
-}
-
-console.log('No args provided');
