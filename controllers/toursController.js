@@ -7,6 +7,7 @@ exports.getAllTours = async (req, res) => {
     const queryObj = { ...req.query };
     const excludedQueries = ['page', 'sort', 'fields', 'limit'];
     excludedQueries.forEach((el) => delete queryObj[el]);
+
     //1B) Filtering advanced
     //refactoring the query for the advanced filters
     const queryStr = JSON.stringify(queryObj).replace(
@@ -15,7 +16,7 @@ exports.getAllTours = async (req, res) => {
     );
 
     //querying the database
-    let query = Tour.find(JSON.parse(queryStr), { price: 1, duration: 1 });
+    let query = Tour.find(JSON.parse(queryStr));
 
     //2)Sorting
     if (req.query.sort) {
@@ -23,8 +24,30 @@ exports.getAllTours = async (req, res) => {
       const sortBy = req.query.sort.split(',').join(' ');
       console.log(sortBy);
       query = query.sort(sortBy);
+    } else {
+      query = query.sort('createdAt');
     }
-    //getting the results back
+
+    //3)Field limiting
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+      query = query.select(fields);
+    } else {
+      query = query.select('-__v');
+    }
+
+    // 4) Pagination
+    const page = +req.query.page || 1;
+    const limit = +req.query.limit || 100;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+    //page request is not available
+    if (req.query.page) {
+      const totalDocs = await Tour.countDocuments();
+      if (skip >= totalDocs) throw new Error('The page request is not found ');
+    }
+
+    //Executing the query
     const tours = await query;
 
     /*    const query = Tour.find()
