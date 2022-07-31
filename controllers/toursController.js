@@ -1,5 +1,12 @@
 const Tour = require('../models/tourModel');
 
+exports.getTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.page = '1';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,duration,difficulty';
+  next();
+};
 exports.getAllTours = async (req, res) => {
   try {
     //1A) Filtering
@@ -48,6 +55,7 @@ exports.getAllTours = async (req, res) => {
     }
 
     //Executing the query
+    //query.select().sort().skip().limit()
     const tours = await query;
 
     /*    const query = Tour.find()
