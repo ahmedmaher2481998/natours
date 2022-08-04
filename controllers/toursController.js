@@ -128,15 +128,56 @@ exports.getTourStats = async (req, res) => {
         },
       },
       { $sort: { avgPrice: 1 } },
-      {
-        // $match: {
-        //   _id: { $ne: 'EASY' },
-        // },
-      },
+      // {
+      // $match: {
+      //   _id: { $ne: 'EASY' },
+      // },
+      // },
     ]);
     res.status(200).json({
       status: 'success',
       data: stats,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'Failed',
+      message: err,
+    });
+  }
+};
+exports.getMonthlyTours = async (req, res) => {
+  try {
+    const year = req.params.year * 1;
+    const monthlyTours = await Tour.aggregate([
+      {
+        $unwind: '$startDates',
+      },
+      {
+        $match: {
+          startDates: { $gte: new Date(`${year}-01-01`), $lte: new Date(`${year}-12-31`) },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$startDates' },
+          numToursPerMonth: { $sum: 1 },
+          Tours: { $push: '$name' },
+        },
+      },
+      {
+        $addFields: { month: '$_id' },
+      },
+      {
+        $sort: { numToursPerMonth: -1 },
+      },
+      {
+        $project: { _id: 0 },
+      },
+      { $limit: 6 },
+    ]);
+    res.status(200).json({
+      status: 'success',
+      data: monthlyTours,
     });
   } catch (err) {
     res.status(400).json({
