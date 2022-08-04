@@ -1,62 +1,24 @@
 const Tour = require('../models/tourModel');
+const APIFeatures = require('../utils/apiFeatures');
 
 exports.getTopTours = (req, res, next) => {
   req.query.limit = '5';
-  req.query.page = '1';
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,price,ratingsAverage,summary,duration,difficulty';
+
   next();
 };
+
 exports.getAllTours = async (req, res) => {
   try {
-    //1A) Filtering
-    //build query object using basic filters
-    const queryObj = { ...req.query };
-    const excludedQueries = ['page', 'sort', 'fields', 'limit'];
-    excludedQueries.forEach((el) => delete queryObj[el]);
-
-    //1B) Filtering advanced
-    //refactoring the query for the advanced filters
-    const queryStr = JSON.stringify(queryObj).replace(
-      /\b(lte|lt|gte|gt)\b/g,
-      (match) => `$${match}`
-    );
-
-    //querying the database
-    let query = Tour.find(JSON.parse(queryStr));
-
-    //2)Sorting
-    if (req.query.sort) {
-      // query.sort(price duration)
-      const sortBy = req.query.sort.split(',').join(' ');
-      console.log(sortBy);
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort('createdAt');
-    }
-
-    //3)Field limiting
-    if (req.query.fields) {
-      const fields = req.query.fields.split(',').join(' ');
-      query = query.select(fields);
-    } else {
-      query = query.select('-__v');
-    }
-
-    // 4) Pagination
-    const page = +req.query.page || 1;
-    const limit = +req.query.limit || 100;
-    const skip = (page - 1) * limit;
-    query = query.skip(skip).limit(limit);
-    //page request is not available
-    if (req.query.page) {
-      const totalDocs = await Tour.countDocuments();
-      if (skip >= totalDocs) throw new Error('The page request is not found ');
-    }
-
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .limitFields()
+      .paginate()
+      .sort();
     //Executing the query
     //query.select().sort().skip().limit()
-    const tours = await query;
+    const tours = await features.query;
 
     /*    const query = Tour.find()
     .where('duration')
