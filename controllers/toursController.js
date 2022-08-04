@@ -160,7 +160,7 @@ exports.getMonthlyTours = async (req, res) => {
       {
         $group: {
           _id: { $month: '$startDates' },
-          numToursPerMonth: { $sum: 1 },
+          numOfToursStarts: { $sum: 1 },
           Tours: { $push: '$name' },
         },
       },
@@ -168,12 +168,12 @@ exports.getMonthlyTours = async (req, res) => {
         $addFields: { month: '$_id' },
       },
       {
-        $sort: { numToursPerMonth: -1 },
+        $sort: { numOfToursStarts: -1 },
       },
       {
         $project: { _id: 0 },
       },
-      { $limit: 6 },
+      { $limit: 12 },
     ]);
     res.status(200).json({
       status: 'success',
