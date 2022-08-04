@@ -58,6 +58,7 @@ const tourSchema = mongoose.Schema(
       type: [Date],
       required: [true, 'Tour must have start Dates'],
     },
+    secretTour: Boolean,
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
@@ -66,7 +67,7 @@ tourSchema.virtual('durationInWeeks').get(function () {
   return this.duration / 7;
 });
 
-//save pre hook works on inertOne and Create doesn't work on inertMany
+//Doc middle ware : save pre hook works on inertOne and Create doesn't work on inertMany
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
@@ -83,5 +84,24 @@ tourSchema.post('save', function (doc, next) {
 });
 */
 
+//Query middle ware  :
+tourSchema.pre(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } });
+  // console.log('secrets is reserved...');
+  // this.start = Date.now();
+  next();
+});
+tourSchema.post(/^find/, function (docs, next) {
+  console.log(`the Query took ${Date.now() - this.start} ms to complete `);
+  delete this.start;
+  // console.log(docs);
+  next();
+});
+
+tourSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  console.log(this.pipeline());
+  next();
+});
 const Tour = mongoose.model('Tour', tourSchema);
 module.exports = Tour;
